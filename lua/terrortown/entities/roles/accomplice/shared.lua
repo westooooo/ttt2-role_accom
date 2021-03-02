@@ -7,8 +7,6 @@ if SERVER then
 	util.AddNetworkString("TTT2AccompliceSyncClasses")
 end
 
-ROLE.index = ROLE_ACCOMPLICE
-
 function ROLE:PreInitialize()
 	self.color = Color(130, 30, 45, 255)
 
