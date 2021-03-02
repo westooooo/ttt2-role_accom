@@ -7,8 +7,6 @@ if SERVER then
 	util.AddNetworkString("TTT2AccompliceSyncClasses")
 end
 
-ROLE.index = ROLE_ACCOMPLICE
-
 function ROLE:PreInitialize()
 	self.color = Color(130, 30, 45, 255)
 
@@ -36,7 +34,6 @@ function ROLE:PreInitialize()
 	}
 end
 
-local h_TTT2CheckCreditAward = "TTT2AccompliceSpecialCreditReward"
 local h_TTTCPostReceiveCustomClasses = "TTT2AccompliceCanSeeClasses"
 
 if SERVER then
@@ -50,33 +47,17 @@ if SERVER then
 				net.WriteUInt(ply:GetCustomClass() or 0, CLASS_BITS)
 				net.Send(accomplice)
 			end
-		end
-	end
+		end)
 
-	hook.Add("TTT2CheckCreditAward", h_TTT2CheckCreditAward, function(victim, attacker)
-		if IsValid(attacker) and attacker:IsPlayer() and attacker:IsActive() and attacker:GetSubRole() == ROLE_ACCOMPLICE then
-			return false -- prevent awards
-		end
-	end)
+		hook.Add('TTT2TellTraitors', 'TTT2HideTraitorMessageAccomplice', function(tmp, ply)
+			if ply:GetSubRole() ~= ROLE_ACCOMPLICE then return end
+			return false
+		end)
 
-	hook.Add("TTT2UpdateSubrole", h_TTTCPostReceiveCustomClasses, function(accomplice, oldRole, role)
-		if not TTTC then return end
-
-		if accomplice:IsActive() and role == ROLE_ACCOMPLICE then
-			SendClassesToAccomplice(accomplice)
-		end
-	end)
-
-	hook.Add("TTTCPostReceiveCustomClasses", h_TTTCPostReceiveCustomClasses, function()
-		if not TTTC then return end
-
-		for _, accomplice in ipairs(player.GetAll()) do
-			if accomplice:IsActive() and accomplice:GetSubRole() == ROLE_TRAITOR then
-				SendClassesToAccomplice(accomplice)
-			end
-		end
-	end)
-end
+		hook.Add('TTT2AvoidTeamChat', 'TTT2AvoidAccompliceChat', function(sender, team, msg)
+			if sender:GetSubRole() ~= ROLE_ACCOMPLICE or GetRoundState() ~= ROUND_ACTIVE then return end
+			return false
+		end)
 
 if CLIENT then
 	net.Receive("TTT2AccompliceSyncClasses", function(len)
